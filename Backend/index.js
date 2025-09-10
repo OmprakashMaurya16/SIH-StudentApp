@@ -3,6 +3,9 @@ const cors = require("cors");
 const express = require("express");
 const mongoose = require("mongoose");
 const dashboardRoute = require("./routes/dashboardRoute");
+const authRoute = require("./routes/authRoute");
+const adminRoute = require("./routes/adminRoute");
+const activityRoute = require("./routes/activityRoute");
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -20,6 +23,9 @@ app.use(express.json());
 app.use(cors());
 
 app.use("/api/dashboard", dashboardRoute);
+app.use("/api", authRoute);
+app.use("/api/admin", adminRoute);
+app.use("/api/activities", activityRoute);
 
 app.get("/", (req, res) => {
   res.send("Hello");
