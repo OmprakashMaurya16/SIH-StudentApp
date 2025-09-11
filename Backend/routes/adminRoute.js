@@ -1,12 +1,12 @@
 const express = require("express");
-const router = express.Router();
-
 const {
   getPendingActivities,
   approveActivity,
   rejectActivity,
 } = require("../controllers/adminController");
 const { protect, adminAndFaculty } = require("../middleware/authMiddleware");
+
+const router = express.Router();
 
 router.get(
   "/activities/pending",

@@ -25,8 +25,8 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: ["student", "faculty", "admin"],
-      required: true,
       default: "student",
+      required: true,
     },
 
     rollNo: {
@@ -65,6 +65,7 @@ const userSchema = new mongoose.Schema(
         type: String,
         trim: true,
       },
+
       bio: {
         type: String,
         trim: true,
@@ -75,6 +76,4 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const userModel = mongoose.model("User", userSchema);
-
-module.exports = userModel;
+module.exports = mongoose.model("User", userSchema);

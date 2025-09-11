@@ -37,6 +37,7 @@ const activitySchema = new mongoose.Schema(
         type: String,
         trim: true,
       },
+
       fileType: {
         type: String,
         trim: true,
@@ -54,9 +55,11 @@ const activitySchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
+
       validatedAt: {
         type: Date,
       },
+
       validationComment: {
         type: String,
         trim: true,
@@ -67,6 +70,4 @@ const activitySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const activityModel = mongoose.model("Activity", activitySchema);
-
-module.exports = activityModel;
+module.exports = mongoose.model("Activity", activitySchema);

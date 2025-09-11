@@ -2,22 +2,12 @@ const Activity = require("../models/activityModel");
 
 const getDashboardSummary = async (req, res) => {
   try {
-    const studentId = { _id: "68c1a5b2f984b1790e3f95d6" };
-
     const activities = await Activity.find({
-      studentId,
+      studentId: req.user._id,
       status: "approved",
     });
 
-    if (!activities || activities.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "No approved activities found for this student",
-      });
-    }
-
     const totalActivities = activities.length;
-
     const creditsEarned = activities.reduce(
       (sum, curr) => sum + (curr.credit || 1),
       0
@@ -31,19 +21,39 @@ const getDashboardSummary = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      studentId,
-      totalActivities,
-      creditsEarned,
-      activityByType,
-      activities,
+      message: "Dashboard summary fetched successfully",
+      data: { totalActivities, creditsEarned, activityByType, activities },
     });
   } catch (error) {
-    console.error("Error in getDashboardSummary:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error while fetching dashboard summary",
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-module.exports = { getDashboardSummary };
+const getDashboardStats = async (req, res) => {
+  try {
+    const approved = await Activity.countDocuments({
+      studentId: req.user._id,
+      status: "approved",
+    });
+
+    const pending = await Activity.countDocuments({
+      studentId: req.user._id,
+      status: "pending",
+    });
+
+    const rejected = await Activity.countDocuments({
+      studentId: req.user._id,
+      status: "rejected",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Dashboard stats fetched successfully",
+      data: { approved, pending, rejected },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { getDashboardSummary, getDashboardStats };
