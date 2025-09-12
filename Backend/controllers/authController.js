@@ -62,6 +62,9 @@ const loginUser = async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
+      if (process.env.DEBUG_AUTH === 'true') {
+        console.warn('[LOGIN] User not found for email:', email);
+      }
       return res.status(401).json({
         success: false,
         message: "Invalid email or password",
@@ -70,12 +73,18 @@ const loginUser = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      if (process.env.DEBUG_AUTH === 'true') {
+        console.warn('[LOGIN] Password mismatch for email:', email);
+      }
       return res.status(401).json({
         success: false,
         message: "Invalid email or password",
       });
     }
 
+    if (process.env.DEBUG_AUTH === 'true') {
+      console.log('[LOGIN] Success for user id:', user._id.toString());
+    }
     res.status(200).json({
       success: true,
       message: "Login successful",

@@ -8,13 +8,12 @@ const {
   getActivityStatus,
 } = require("../controllers/activityController");
 const { protect } = require("../middleware/authMiddleware");
-const parser = require("../middleware/upload");
 
 const router = express.Router();
 
 router.use(protect);
 
-router.post("/", parser.single("proof"), createActivity);
+router.post("/", createActivity);
 
 router.get("/", getMyActivities);
 

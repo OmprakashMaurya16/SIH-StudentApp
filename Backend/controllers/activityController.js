@@ -1,17 +1,8 @@
 const Activity = require("../models/activityModel");
 
 const createActivity = async (req, res) => {
-  const { activityType, title, description, date } = req.body;
-
+  const { activityType, title, description, date, proof } = req.body;
   try {
-    let proof = {};
-    if (req.file) {
-      proof = {
-        ImageUrl: req.file.path,
-        fileType: req.file.mimetype,
-      };
-    }
-
     const newActivity = await Activity.create({
       studentId: req.user._id,
       activityType,
@@ -20,7 +11,6 @@ const createActivity = async (req, res) => {
       date,
       proof,
     });
-
     res.status(201).json({ success: true, data: newActivity });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

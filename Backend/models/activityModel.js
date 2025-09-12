@@ -33,7 +33,7 @@ const activitySchema = new mongoose.Schema(
     },
 
     proof: {
-      ImageUrl: {
+      fileUrl: {
         type: String,
         trim: true,
       },

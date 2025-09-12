@@ -3,26 +3,27 @@ const User = require("../models/userModel");
 
 const protect = async (req, res, next) => {
   let token;
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
     try {
-      token = req.headers.authorization.split(" ")[1];
+      token = authHeader.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.user = await User.findById(decoded.id).select("-password");
       if (!req.user) {
+        console.warn("AuthMiddleware: user not found for decoded token id", decoded.id);
         return res
           .status(401)
           .json({ success: false, message: "Not authorized, user not found" });
       }
       return next();
-    } catch {
+    } catch (err) {
+      console.warn("AuthMiddleware: token verification failed", err?.message);
       return res
         .status(401)
         .json({ success: false, message: "Not authorized, token failed" });
     }
   }
+  console.warn("AuthMiddleware: missing or malformed Authorization header", authHeader);
   return res
     .status(401)
     .json({ success: false, message: "Not authorized, no token" });

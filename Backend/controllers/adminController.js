@@ -1,3 +1,49 @@
+// Admin Reports Dashboard: total activities, active students, credits awarded, pending review
+const getAdminReportsDashboard = async (req, res) => {
+  try {
+    const { from, to, department } = req.query;
+    const activityFilter = {};
+    const userFilter = { role: "student" };
+    if (from && to) {
+      activityFilter.date = { $gte: new Date(from), $lte: new Date(to) };
+    }
+    if (department && department !== "all") {
+      userFilter.department = department;
+    }
+    // Get students (optionally filtered by department)
+    const students = await User.find(userFilter).select("_id");
+    const studentIds = students.map(s => s._id);
+    if (studentIds.length > 0) {
+      activityFilter.studentId = { $in: studentIds };
+    }
+
+    // Total activities
+    const totalActivities = await Activity.countDocuments(activityFilter);
+
+    // Active students (students with at least one activity in filter)
+    const activeStudents = await Activity.distinct("studentId", activityFilter);
+    const activeStudentsCount = activeStudents.length;
+
+    // Credits awarded (sum of credit field for approved activities)
+    const approvedActivities = await Activity.find({ ...activityFilter, status: "approved" });
+    const creditsAwarded = approvedActivities.reduce((sum, a) => sum + (a.credit || 1), 0);
+
+    // Pending review (activities with status 'pending')
+    const pendingReview = await Activity.countDocuments({ ...activityFilter, status: "pending" });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalActivities,
+        activeStudents: activeStudentsCount,
+        creditsAwarded,
+        pendingReview,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 const Activity = require("../models/activityModel");
 
 const getPendingActivities = async (req, res) => {
@@ -99,9 +145,35 @@ const getActivityStatus = async (req, res) => {
   }
 };
 
+
+const User = require("../models/userModel");
+
+// Admin dashboard stats: total users, students, faculties, activities
+const getAdminStats = async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const totalStudents = await User.countDocuments({ role: "student" });
+    const totalFaculties = await User.countDocuments({ role: "faculty" });
+    const totalActivities = await Activity.countDocuments();
+    res.status(200).json({
+      success: true,
+      data: {
+        totalUsers,
+        totalStudents,
+        totalFaculties,
+        totalActivities,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   getPendingActivities,
   approveActivity,
   rejectActivity,
   getActivityStatus,
+  getAdminStats,
+  getAdminReportsDashboard,
 };
